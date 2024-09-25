@@ -227,6 +227,9 @@ class MainWindow(QMainWindow):
             background-color: #ccc;
         }
         """
+        # style_file = "py_dracula_light.qss"
+        # with open(style_file, "r") as f:
+        #     style_sheet = f.read()
         self.setStyleSheet(style_sheet)
 
 
