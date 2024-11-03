@@ -4,8 +4,8 @@ import plotly.express as px
 import os
 
 # 设置页面标题
-st.title("电机数据处理模块")
-st.write("选择一个文件夹来加载 .pkl 文件。")
+st.markdown("#### → ⚙️电机数据处理模块")
+st.text("选择一个文件夹来加载电机文件。")
 
 
 @st.cache_data
@@ -14,11 +14,13 @@ def load_data(file_path) -> pd.DataFrame:
         return pd.read_pickle(file_path)
     return pd.DataFrame()
 
-def downsample_data(df: pd.DataFrame, max_points: int = 5000) -> pd.DataFrame:
+
+def downsample_data(df: pd.DataFrame, max_points: int = 10000) -> pd.DataFrame:
     """对数据进行下采样，确保数据点数量不超过 max_points"""
     if len(df) > max_points:
-        df = df.iloc[::len(df) // max_points]
+        df = df.iloc[:: len(df) // max_points]
     return df
+
 
 # 输入文件夹路径
 folder_path = st.text_input("请输入文件夹路径：")

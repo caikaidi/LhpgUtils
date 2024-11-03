@@ -135,12 +135,13 @@ def convert_to_images(file_list):
             for ts, data in frame_ts_and_ndarrays:
                 executor.submit(_save_image, ts, data, photo_folder)
 
+
 def _convert_bin_to_video(file_list, video_path):
     all_frames = []
     for file_name in file_list:
         frame_ts_and_ndarrays = _read_bin_file(os.path.join(folder_path, file_name))
         all_frames.extend([data for ts, data in frame_ts_and_ndarrays])
-    
+
     if not all_frames:
         st.error("没有找到有效的帧数据，请检查输入文件是否正确。")
         return
@@ -156,9 +157,9 @@ def _convert_bin_to_video(file_list, video_path):
         if len(frame.shape) == 2:  # 灰度图
             frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
         video_writer.write(frame)
-    
+
     video_writer.release()
-    
+
 
 def convert_to_video(file_list):
     if not file_list:
@@ -172,12 +173,12 @@ def convert_to_video(file_list):
     ts = int(ts_str)
     formatted_time = datetime.datetime.fromtimestamp(ts).strftime("%Y%m%d-%H点%M分")
     video_path = os.path.join(video_folder, f"{formatted_time}.mp4")
-    
+
     _convert_bin_to_video(file_list, video_path)
 
 
-st.title("相机数据处理模块")
-st.write("选择一个文件夹来加载 .bin 文件。")
+st.markdown("#### → 📸相机数据处理模块")
+st.text("选择一个文件夹来加载相机文件。")
 
 # 选择文件夹路径
 folder_path = st.text_input("请输入文件夹路径：")

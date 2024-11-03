@@ -6,8 +6,8 @@ import os
 from scipy.signal import savgol_filter
 
 # 设置页面标题
-st.title("光谱数据处理模块")
-st.write("选择一个文件夹来加载 .pkl 文件。")
+st.markdown("#### → 🌈光谱数据处理模块")
+st.text("选择一个文件夹来加载光谱数据文件。")
 
 
 @st.cache_data
@@ -40,7 +40,7 @@ def get_intensity_by_wavelength(df, wavelength, smooth=False, to_db=False):
     return intensity
 
 
-def downsample_data(data: np.ndarray, max_points: int = 5000) -> np.ndarray:
+def downsample_data(data: np.ndarray, max_points: int = 10000) -> np.ndarray:
     """对数据进行下采样，确保数据点数量不超过 max_points"""
     if len(data) > max_points:
         step = len(data) // max_points
