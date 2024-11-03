@@ -31,7 +31,9 @@ if folder_path:
                 {
                     "filename": image_files,
                     "create_time": [
-                        os.path.getctime(os.path.join(folder_path, f))
+                        pd.to_datetime(
+                            os.path.getctime(os.path.join(folder_path, f)), unit="s"
+                        )
                         for f in image_files
                     ],
                 }
