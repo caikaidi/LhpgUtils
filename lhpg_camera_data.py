@@ -138,20 +138,24 @@ def convert_to_images(file_list):
 
 def _convert_bin_to_video(file_list, video_path):
     all_frames = []
-    for file_name in file_list:
+    process_bar = st.progress(0, text="正在读取第 0 个文件")
+    for i, file_name in enumerate(file_list):
+        process_bar.progress((i + 1) / len(file_list), text=f"正在读取第 {i+1} 个文件")
         frame_ts_and_ndarrays = _read_bin_file(os.path.join(folder_path, file_name))
-        all_frames.extend([data for ts, data in frame_ts_and_ndarrays])
+        all_frames.extend([(ts, data) for ts, data in frame_ts_and_ndarrays])
 
     if not all_frames:
         st.error("没有找到有效的帧数据，请检查输入文件是否正确。")
         return
+    
+    all_frames.sort(key=lambda x: x[0])  # 按时间戳排序
 
-    height, width = all_frames[0].shape
+    height, width = all_frames[0][1].shape
     video_writer = cv2.VideoWriter(
         video_path, cv2.VideoWriter_fourcc(*"mp4v"), 30, (width, height)
     )  # encoder fourcc: mp4v, fps: 30
 
-    process_bar = st.progress(0, text="正在处理第 0 帧")
+    process_bar.progress(0, text="正在处理第 0 帧")
     for i, frame in enumerate(all_frames):
         process_bar.progress((i + 1) / len(all_frames), text=f"正在处理第 {i+1} 帧")
         if len(frame.shape) == 2:  # 灰度图
