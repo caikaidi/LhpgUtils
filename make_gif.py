@@ -5,7 +5,7 @@ from PIL import Image
 import cv2
 
 # 设置页面标题
-st.title("GIF 制作模块")
+st.markdown("#### GIF 制作工具")
 st.write("选择一个文件夹来加载图片/视频文件。")
 
 

@@ -156,7 +156,8 @@ def _convert_bin_to_video(file_list, video_path):
     )  # encoder fourcc: mp4v, fps: 30
 
     process_bar.progress(0, text="正在处理第 0 帧")
-    for i, frame in enumerate(all_frames):
+    for i, ts_frame in enumerate(all_frames):
+        ts, frame = ts_frame
         process_bar.progress((i + 1) / len(all_frames), text=f"正在处理第 {i+1} 帧")
         if len(frame.shape) == 2:  # 灰度图
             frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)

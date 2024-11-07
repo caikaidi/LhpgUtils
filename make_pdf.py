@@ -4,7 +4,7 @@ import pandas as pd
 import os
 
 # 新建 PDF 制作页面
-st.title("PDF 制作模块")
+st.markdown("#### PDF 制作工具")
 st.write("选择一个文件夹来加载图片文件。")
 
 # 输入文件夹路径
