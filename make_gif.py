@@ -84,6 +84,7 @@ if folder_path:
                                         )
                                     )
                                 cap.release()
+                                st.write(f"视频文件 {file} 已提取 {len(images)} 张图片。")
                             else:
                                 # 读取图片文件
                                 img = Image.open(file_path)
