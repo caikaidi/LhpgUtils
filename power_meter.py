@@ -30,9 +30,15 @@ if device_addr:
     power_meter = rm.open_resource(device_addr)
     st.success(f"已连接到设备：{device_name}")
 
+    power_meter.write("SENS:RANGE:AUTO ON")
+    power_meter.write("SENS:POW:UNIT W")
+    # #set averaging to 1000 points
+    # power_meter.write("SENS:AVER:1000")
+
     # 功能1：改变测量波长
     st.header("设置测量波长")
     default_wavelength = power_meter.query("correction:wavelength?").strip()
+
     st.write(f"当前测量波长：{default_wavelength} nm")
     wavelength = st.number_input(
         "输入波长 (nm)",
