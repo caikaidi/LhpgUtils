@@ -1,7 +1,10 @@
-import streamlit as st
+import os
+
 import pandas as pd
 import plotly.graph_objects as go
-import os
+import streamlit as st
+
+from _tool_functions import downsample_data
 
 # 设置页面标题
 st.markdown("#### → 🔋️功率数据处理模块")
@@ -21,13 +24,6 @@ def load_power_data(file_path) -> pd.DataFrame:
         df.columns = ["voltage", "power"]
         return df
     return pd.DataFrame()
-
-
-def downsample_data(df: pd.DataFrame, max_points: int = 10000) -> pd.DataFrame:
-    """对数据进行下采样，确保数据点数量不超过 max_points"""
-    if len(df) > max_points:
-        df = df.iloc[:: len(df) // max_points]
-    return df
 
 
 def add_time_axis(df: pd.DataFrame, interval: float) -> pd.DataFrame:
@@ -107,4 +103,6 @@ if folder_path:
                     yaxis_title="Power (W)",
                 )
 
-                plot = st.plotly_chart(fig, use_container_width=True, config={"editable": True})
+                plot = st.plotly_chart(
+                    fig, use_container_width=True, config={"editable": True}
+                )

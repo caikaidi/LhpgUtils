@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import os
+from _tool_functions import downsample_data
 
 # 设置页面标题
 st.markdown("#### → ⚙️电机数据处理模块")
@@ -13,13 +14,6 @@ def load_data(file_path) -> pd.DataFrame:
     if file_path:
         return pd.read_pickle(file_path)
     return pd.DataFrame()
-
-
-def downsample_data(df: pd.DataFrame, max_points: int = 10000) -> pd.DataFrame:
-    """对数据进行下采样，确保数据点数量不超过 max_points"""
-    if len(df) > max_points:
-        df = df.iloc[:: len(df) // max_points]
-    return df
 
 
 # 输入文件夹路径

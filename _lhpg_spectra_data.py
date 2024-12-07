@@ -1,9 +1,10 @@
-import streamlit as st
-import pandas as pd
-import numpy as np
-import plotly.express as px
 import os
-from scipy.signal import savgol_filter
+
+import pandas as pd
+import plotly.express as px
+import streamlit as st
+
+from _tool_functions import downsample_data, get_intensity_by_wavelength
 
 # 设置页面标题
 st.markdown("#### → 🌈光谱数据处理模块")
@@ -15,37 +16,6 @@ def load_data(file_path) -> pd.DataFrame:
     if file_path:
         return pd.read_pickle(file_path)
     return pd.DataFrame()
-
-
-def get_intensity_by_wavelength(df, wavelength, smooth=False, to_db=False):
-    """根据指定波长获取各条数据的强度值，支持平滑和dB转换"""
-    # 获取指定波长的索引
-    wavelength_index = np.argmin(np.abs(df["wavelengths"].iloc[0] - wavelength))
-
-    # 提取所有条目中该波长的强度
-    intensity = np.array(
-        [intensity_row[wavelength_index] for intensity_row in df["intensitys"]]
-    )
-
-    # 平滑处理
-    if smooth:
-        window_size = max(3, len(intensity) // 50)  # 自适应窗口大小
-        intensity = savgol_filter(intensity, window_size, polyorder=2)
-
-    # 转换为 dB
-    if to_db:
-        reference = intensity[0]  # 使用第一个强度值作为参考
-        intensity = -10 * np.log10(intensity / reference)
-
-    return intensity
-
-
-def downsample_data(data: np.ndarray, max_points: int = 10000) -> np.ndarray:
-    """对数据进行下采样，确保数据点数量不超过 max_points"""
-    if len(data) > max_points:
-        step = len(data) // max_points
-        data = data[::step]
-    return data
 
 
 # 输入文件夹路径

@@ -1,8 +1,9 @@
 import os
-import streamlit as st
-import pandas as pd
-from PIL import Image
+
 import cv2
+import pandas as pd
+import streamlit as st
+from PIL import Image
 
 # 设置页面标题
 st.markdown("#### GIF 制作工具")
@@ -84,7 +85,9 @@ if folder_path:
                                         )
                                     )
                                 cap.release()
-                                st.write(f"视频文件 {file} 已提取 {len(images)} 张图片。")
+                                st.write(
+                                    f"视频文件 {file} 已提取 {len(images)} 张图片。"
+                                )
                             else:
                                 # 读取图片文件
                                 img = Image.open(file_path)
