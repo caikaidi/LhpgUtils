@@ -67,7 +67,11 @@ if st.session_state["camera_file"]:
 
             # 转视频
             camera_file_list = os.listdir(temp_dir)
-            convert_to_video(camera_file_list, st.session_state["folder_path"], file_folder_path=temp_dir)
+            convert_to_video(
+                camera_file_list,
+                st.session_state["folder_path"],
+                file_folder_path=temp_dir,
+            )
             st.success("视频生成完成！")
         finally:
             shutil.rmtree(temp_dir)

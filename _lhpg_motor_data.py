@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import os
+import numpy as np
 from _tool_functions import downsample_data
 
 # 设置页面标题
@@ -67,6 +68,7 @@ if folder_path:
 
                 # 获取列名列表
                 columns = df.columns.tolist()
+                pull_speed = df["motor1"].mode()[0]
 
                 # 默认绘图
                 if "time_axis" in df.columns and "fiber diameter" in df.columns:
@@ -79,13 +81,38 @@ if folder_path:
                         title=f"{selected_file} - 默认绘图",
                     )
                     st.plotly_chart(fig)
+
+                    # 频谱图
+                    x_sec = df["time_axis"] * 60
+                    uniformed_x = np.linspace(x_sec.min(), x_sec.max(), len(x_sec))
+                    uniformed_y = np.interp(uniformed_x, x_sec, df["fiber diameter"])
+                    uniformed_y = uniformed_y - np.mean(uniformed_y)
+                    N = len(uniformed_x)
+                    sampling_interval = uniformed_x[1] - uniformed_x[0]
+                    yf = np.fft.fft(uniformed_y)
+                    xf = np.fft.fftfreq(N, sampling_interval)
+                    positive_indices = xf > 0
+                    xf = xf[positive_indices]
+                    yf = np.abs(yf[positive_indices])
+                    remove_high_freq = xf < 1
+                    xf = xf[remove_high_freq]
+                    yf = yf[remove_high_freq]
+                    df_fft = downsample_data(pd.DataFrame({"Frequency (Hz)": xf, "Amplitude": yf}), 50000)
+                    fig_fft = px.line(
+                        df_fft,
+                        x="Frequency (Hz)",
+                        y="Amplitude",
+                        title=f"{selected_file} - 频谱图",
+                    )
+
+                    st.plotly_chart(fig_fft)
                 else:
                     st.write(
                         "数据中缺少 `time_axis` 或 `fiber diameter` 列，无法绘制默认图表。"
                     )
 
                 # 手动选择列并更新绘图
-                st.write("手动选择用于可视化的列：")
+                st.markdown(f"本次拉制速度：***{pull_speed:.2f} mm/min***, 采样频率：***{1/sampling_interval:.1f} Hz***, 选择需要的列：")
                 columns = df.columns.tolist()
                 x_axis = st.selectbox(
                     "选择 X 轴",
