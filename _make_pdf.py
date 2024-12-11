@@ -9,7 +9,7 @@ st.markdown("#### PDF 制作工具")
 st.write("选择一个文件夹来加载图片文件。")
 
 # 输入文件夹路径
-folder_path = st.text_input("请输入文件夹路径：")
+folder_path = st.text_input("请输入文件夹路径：").strip("\"'")
 
 # 查找文件夹中的所有图片文件
 image_files = []

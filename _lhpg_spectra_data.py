@@ -19,7 +19,7 @@ def load_data(file_path) -> pd.DataFrame:
 
 
 # 输入文件夹路径
-folder_path = st.text_input("请输入文件夹路径：")
+folder_path = st.text_input("请输入文件夹路径：").strip("\"'")
 
 # 查找文件夹下的所有包含 "spectra" 的 .pkl 文件
 spectra_files = []

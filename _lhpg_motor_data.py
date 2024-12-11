@@ -1,9 +1,11 @@
-import streamlit as st
+import os
+
+import numpy as np
 import pandas as pd
 import plotly.express as px
-import os
-import numpy as np
-from _tool_functions import downsample_data
+import streamlit as st
+
+from _tool_functions import auto_fft, downsample_data
 
 # 设置页面标题
 st.markdown("#### → ⚙️电机数据处理模块")
@@ -18,7 +20,7 @@ def load_data(file_path) -> pd.DataFrame:
 
 
 # 输入文件夹路径
-folder_path = st.text_input("请输入文件夹路径：")
+folder_path = st.text_input("请输入文件夹路径：").strip("\"'")
 
 # 查找文件夹下的所有 .pkl 文件
 pkl_files = []
@@ -84,24 +86,11 @@ if folder_path:
 
                     # 频谱图
                     x_sec = df["time_axis"] * 60
-                    uniformed_x = np.linspace(x_sec.min(), x_sec.max(), len(x_sec))
-                    uniformed_y = np.interp(uniformed_x, x_sec, df["fiber diameter"])
-                    uniformed_y = uniformed_y - np.mean(uniformed_y)
-                    N = len(uniformed_x)
-                    sampling_interval = uniformed_x[1] - uniformed_x[0]
-                    yf = np.fft.fft(uniformed_y)
-                    xf = np.fft.fftfreq(N, sampling_interval)
-                    positive_indices = xf > 0
-                    xf = xf[positive_indices]
-                    yf = np.abs(yf[positive_indices])
-                    remove_high_freq = xf < 1
-                    xf = xf[remove_high_freq]
-                    yf = yf[remove_high_freq]
-                    df_fft = downsample_data(pd.DataFrame({"Frequency (Hz)": xf, "Amplitude": yf}), 50000)
+                    df_fft = auto_fft(x_sec, df["fiber diameter"], cut_off=1, downsample_length=50000)
                     fig_fft = px.line(
                         df_fft,
-                        x="Frequency (Hz)",
-                        y="Amplitude",
+                        x="x_fft",
+                        y="y_fft",
                         title=f"{selected_file} - 频谱图",
                     )
 
@@ -112,7 +101,9 @@ if folder_path:
                     )
 
                 # 手动选择列并更新绘图
-                st.markdown(f"本次拉制速度：***{pull_speed:.2f} mm/min***, 采样频率：***{1/sampling_interval:.1f} Hz***, 选择需要的列：")
+                st.markdown(
+                    f"本次拉制速度：***{pull_speed:.2f} mm/min***, 选择需要的列："
+                )
                 columns = df.columns.tolist()
                 x_axis = st.selectbox(
                     "选择 X 轴",

@@ -140,11 +140,12 @@ def convert_to_images(file_list, folder_path):
 
 
 def _convert_bin_to_video(file_list, video_path, file_folder_path):
-    process_bar = st.progress(0, text="正在转换第 0 个文件")
+    process_bar_placeholder = st.empty()
+    process_bar = process_bar_placeholder.progress(0, text="正在转换文件")
     video_writer = None
 
     for i, file_name in enumerate(file_list):
-        process_bar.progress((i + 1) / len(file_list), text=f"正在读取第 {i+1} 个文件")
+        process_bar.progress((i + 1) / len(file_list), text=f"正在转换第 {i+1} 个文件，共 {len(file_list)} 个文件")
         frame_ts_and_ndarrays = _read_bin_file(os.path.join(file_folder_path, file_name))
 
         # 初始化 video_writer 在第一次处理时设置视频宽高
@@ -165,7 +166,7 @@ def _convert_bin_to_video(file_list, video_path, file_folder_path):
         return
 
     video_writer.release()
-    process_bar.progress(1, text="视频转换完成")
+    process_bar_placeholder.empty()
 
 
 def convert_to_video(file_list, output_folder_path, file_folder_path=None):
@@ -222,3 +223,29 @@ def linear_curve_fit(x, y):
 
     (a, b), _ = curve_fit(fun, x, y)
     return a, b
+
+def auto_fft(time_axis, y_axis, cut_off, downsample_length=30000) -> pd.DataFrame:
+    """自动fft。
+    Args:
+        time_axis: 时间轴（秒），可以是非均匀采样
+        y_axis: 信号值
+        cut_off: 截断频率（Hz）
+        downsample_length: 下采样长度（点数）
+    Returns:
+        dataframe({"x_fft": xf, "y_fft": yf})
+    """
+    uniformed_x = np.linspace(time_axis.min(), time_axis.max(), len(time_axis))
+    uniformed_y = np.interp(uniformed_x, time_axis, y_axis)
+    uniformed_y = uniformed_y - np.mean(uniformed_y)
+    N = len(uniformed_x)
+    sampling_interval = uniformed_x[1] - uniformed_x[0]
+    yf = np.fft.fft(uniformed_y)
+    xf = np.fft.fftfreq(N, sampling_interval)
+    positive_indices = xf > 0
+    xf = xf[positive_indices]
+    yf = np.abs(yf[positive_indices])
+    remove_high_freq = xf < cut_off
+    xf = xf[remove_high_freq]
+    yf = yf[remove_high_freq]
+
+    return downsample_data(pd.DataFrame({"x_fft": xf, "y_fft": yf}), downsample_length)

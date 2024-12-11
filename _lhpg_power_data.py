@@ -33,7 +33,7 @@ def add_time_axis(df: pd.DataFrame, interval: float) -> pd.DataFrame:
 
 
 # 输入文件夹路径
-folder_path = st.text_input("请输入文件夹路径：")
+folder_path = st.text_input("请输入文件夹路径：").strip("\"'")
 
 # 查找文件夹下的所有 .txt 文件
 txt_files = []

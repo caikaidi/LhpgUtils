@@ -27,7 +27,7 @@ def load_files(folder_path):
 
 
 # 输入文件夹路径
-folder_path = st.text_input("请输入文件夹路径：")
+folder_path = st.text_input("请输入文件夹路径：").strip("\"'")
 
 if folder_path:
     if not os.path.isdir(folder_path):
@@ -58,11 +58,76 @@ if folder_path:
                     st.write(f"您选择了 {len(selected_files)} 个文件。")
 
                     # GIF 参数输入
-                    compression_choice = st.selectbox("压缩级别", [32, 64, 128, "无损"])
-                    fps = st.number_input("帧率 (FPS)", min_value=1, value=25)
-                    output_filename = st.text_input(
-                        "输出 GIF 文件名", value="output.gif"
-                    )
+                    col1, col2, col3, col4 = st.columns(4)
+                    with col1:
+                        compression_choice = st.selectbox(
+                            "压缩级别",
+                            ["无损", "256", "128", "64", "32"],
+                            help="如选择32，则输出GIF中将只有32种颜色。",
+                        )
+                    with col2:
+                        fps = st.number_input("帧率 (FPS)", min_value=1, value=25)
+                    with col3:
+                        speed_multiplier = st.number_input(
+                            "倍速", min_value=0.1, value=1.0, step=0.1
+                        )
+                    with col4:
+                        output_filename = st.text_input(
+                            "输出文件名", value="output.gif"
+                        )
+
+                    # 添加裁剪功能
+                    if selected_files[0].lower().endswith((".mp4", ".avi")):
+                        file_path = os.path.join(folder_path, selected_files[0])
+                        cap = cv2.VideoCapture(file_path)
+                        total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+                        video_fps = cap.get(cv2.CAP_PROP_FPS)
+                        video_duration = total_frames / video_fps
+
+                        start_time, end_time = st.slider(
+                            "选择裁剪时间范围 (秒)",
+                            min_value=0.0,
+                            max_value=video_duration,
+                            value=(0.0, video_duration),
+                            step=0.1,
+                        )
+
+                        # 显示起止位置的帧图像
+                        col1, col2 = st.columns(2)
+
+                        with col1:
+                            frame_position_start = int(start_time * video_fps)
+                            cap.set(cv2.CAP_PROP_POS_FRAMES, frame_position_start)
+                            ret, frame_start = cap.read()
+                            if ret:
+                                st.image(
+                                    cv2.cvtColor(frame_start, cv2.COLOR_BGR2RGB),
+                                    caption=f"起始帧 (时间: {start_time:.1f} 秒)",
+                                )
+
+                        with col2:
+                            frame_position_end = int(end_time * video_fps)
+                            cap.set(cv2.CAP_PROP_POS_FRAMES, frame_position_end)
+                            ret, frame_end = cap.read()
+                            if ret:
+                                st.image(
+                                    cv2.cvtColor(frame_end, cv2.COLOR_BGR2RGB),
+                                    caption=f"结束帧 (时间: {end_time:.1f} 秒)",
+                                )
+
+                        cap.release()
+
+                        # 计算帧数信息
+                        total_extracted_frames = int(
+                            (end_time - start_time) * video_fps
+                        )
+                        total_output_frames = int(
+                            total_extracted_frames / speed_multiplier
+                        )  # * (fps / video_fps))
+                        st.markdown(
+                            f"*当前截取范围包含 {total_extracted_frames} 帧，输出 GIF 约 {total_output_frames} 帧，持续时间 {total_output_frames / fps:.1f} 秒。*"
+                        )
+
                     if st.button("生成 GIF"):
                         images = []
                         read_process_bar = st.progress(
@@ -75,7 +140,13 @@ if folder_path:
                             if file.lower().endswith((".mp4", ".avi")):
                                 # 读取视频文件并提取帧
                                 cap = cv2.VideoCapture(file_path)
-                                while cap.isOpened():
+                                frame_start = int(start_time * video_fps)
+                                frame_end = int(end_time * video_fps)
+                                frame_step = int(speed_multiplier)
+
+                                current_frame = frame_start
+                                while current_frame <= frame_end:
+                                    cap.set(cv2.CAP_PROP_POS_FRAMES, current_frame)
                                     ret, frame = cap.read()
                                     if not ret:
                                         break
@@ -84,6 +155,7 @@ if folder_path:
                                             cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                                         )
                                     )
+                                    current_frame += frame_step
                                 cap.release()
                                 st.write(
                                     f"视频文件 {file} 已提取 {len(images)} 张图片。"
