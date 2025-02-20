@@ -6,7 +6,7 @@ Mainly for LHPG data processing.
 ## Install
 
 ```bash
-pip install streamlit streamlit-extra diegoplot opencv-python zstd scipy pyvisa
+pip install streamlit streamlit-extras diegoplot opencv-python zstd scipy pyvisa
 pip install ./RTxReadBin-1.0-py3-none-any.whl
 ```
 
